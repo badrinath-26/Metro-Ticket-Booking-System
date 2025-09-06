@@ -28,7 +28,7 @@ public class TicketServiceImpl implements TicketService {
         Station toStation = stationRepository.findById(toStationId)
                 .orElseThrow(() -> new RuntimeException("To Station not found"));
 
-        // 🚫 Validation: Prevent booking from and to the same station
+        // Validation: Prevent booking from and to the same station
         if (fromStation.getId().equals(toStation.getId())) {
             throw new RuntimeException("From and To stations cannot be the same");
         }

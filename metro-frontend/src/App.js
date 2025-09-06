@@ -1,25 +1,35 @@
-// import './App.css';
-// import TicketList from './components/TicketList';
-// import TicketForm from './components/TicketForm';
-// function App() {
-//   return (
-//     <div className="App">
-//       <h1>Metro Ticket Booking System</h1>
-//       <TicketForm />
-//        <hr />
-//       <TicketList/>
-//     </div>
-//   );
-// }
-
-// export default App;
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-
-import './App.css';
-import TicketList from './components/TicketList';
-import TicketForm from './components/TicketForm';
+import { useState, useEffect } from "react";
+import "./App.css";
+import Dashboard from "./components/Dashboard";
+import Signup from "./components/SignUp";
+import Login from "./components/Login";
+import AdminDashboard from "./components/AdminDashboard";
+import HeroSection from "./components/HeroSection";
+import { getToken, clearToken, isLoggedIn, getUserRole } from "./utils/auth";
 
 function App() {
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState(null);
+
+  useEffect(() => {
+    setLoggedIn(isLoggedIn());
+    if (isLoggedIn()) {
+      setUserRole(getUserRole());
+    }
+  }, []);
+
+  const handleLogout = () => {
+    clearToken();
+    setLoggedIn(false);
+    setUserRole(null);
+  };
+
+  const handleLogin = (role) => {
+    setLoggedIn(true);
+    setUserRole(role);
+  };
+
   return (
     <Router>
       <div className="App">
@@ -27,35 +37,46 @@ function App() {
         <nav className="navbar">
           <div className="logo">Metro Ticket Booking</div>
           <ul className="nav-links">
-            <li><Link to="/">Book Ticket</Link></li>
-            <li><Link to="/tickets">All Tickets</Link></li>
-            <li><Link to="/contact">Contact</Link></li>
+            {loggedIn && userRole === 'ROLE_USER' && (
+              <li><Link to="/dashboard">Dashboard</Link></li>
+            )}
+            {loggedIn && userRole === 'ROLE_ADMIN' && (
+              <li><Link to="/admin">Admin Panel</Link></li>
+            )}
+            {!loggedIn && (
+              <>
+                <li><Link to="/signup">Sign Up</Link></li>
+                <li><Link to="/login">Sign In</Link></li>
+              </>
+            )}
+            {loggedIn && (
+              <li>
+                <button onClick={handleLogout} className="logout-btn">Logout</button>
+              </li>
+            )}
           </ul>
         </nav>
 
         {/* Routes */}
         <Routes>
-          <Route path="/" element={
-            <div style={{ paddingTop: "80px" }}>
-              <h1>Book Your Ticket</h1>
-              <TicketForm />
-            </div>
-          } />
-
-          <Route path="/tickets" element={
-            <div style={{ paddingTop: "80px" }}>
-              <h1>All Booked Tickets</h1>
-              <TicketList />
-            </div>
-          } />
-
-          <Route path="/contact" element={
-            <div style={{ paddingTop: "80px", textAlign: "center" }}>
-              <h2>Contact Us</h2>
-              <p>Email: support@metrobooking.com</p>
-              <p>Phone: +91 98765 43210</p>
-            </div>
-          } />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<Login onLogin={handleLogin} />} />
+          {loggedIn && userRole === 'ROLE_USER' && (
+            <Route path="/dashboard" element={<Dashboard />} />
+          )}
+          {loggedIn && userRole === 'ROLE_ADMIN' && (
+            <Route path="/admin" element={<AdminDashboard />} />
+          )}
+          <Route 
+            path="/" 
+            element={
+              loggedIn ? (
+                userRole === 'ROLE_ADMIN' ? <AdminDashboard /> : <Dashboard />
+              ) : (
+                <HeroSection />
+              )
+            } 
+          />
         </Routes>
       </div>
     </Router>
