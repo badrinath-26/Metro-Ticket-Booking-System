@@ -183,7 +183,7 @@ curl -X POST http://localhost:8080/api/tickets   -H "Authorization: Bearer $TOKE
 ---
 
 ## Author
-Your Name — (Student / Developer)
+Your Name — Y V BADRINATH REDDY
 
 ## License
 MIT
